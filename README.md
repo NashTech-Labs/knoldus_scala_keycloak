@@ -1,0 +1,1 @@
+# knoldus_scala_keycloak
