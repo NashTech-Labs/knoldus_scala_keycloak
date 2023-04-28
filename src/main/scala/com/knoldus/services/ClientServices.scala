@@ -5,7 +5,6 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import com.knoldus.models.entities.Client
-import com.knoldus.response.ResponseUtil
 import org.keycloak.admin.client.Keycloak
 import org.keycloak.representations.idm.ClientRepresentation
 
@@ -28,9 +27,7 @@ class ClientServices(keycloak: Keycloak)(implicit val system: ActorSystem, mat: 
     try {
       println("clientId: " + client.clientId)
       val resp: Response = keycloak.realm(realm).clients().create(Client.convertToClientRep(client))
-      val messages = ResponseUtil.defaultMessages ++ Map(201 -> s"Created client, id: ${client.clientId}")
-      val msg = ResponseUtil.checkResponseStatusGetMessage(resp, messages)
-      Future.successful(msg)
+      Future.successful(client.clientId)
     } catch {
       case e: Throwable =>
         logger.error("Failed to create client: " + e.getLocalizedMessage)

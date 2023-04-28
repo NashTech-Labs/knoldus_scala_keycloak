@@ -1,7 +1,6 @@
 package com.knoldus.models.entities
 
 import com.knoldus.utils.Constants.DEFAULT_PROTOCOL
-import org.apache.commons.lang3.builder.{ToStringBuilder, ToStringStyle}
 import org.keycloak.representations.idm.ClientRepresentation
 
 import scala.jdk.CollectionConverters._

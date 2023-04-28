@@ -5,8 +5,6 @@ import akka.event.LoggingAdapter
 import akka.stream.Materializer
 import com.knoldus.models.Credentials
 import com.knoldus.models.entities.{Role, User}
-import com.knoldus.response.ResponseUtil.checkResponseStatusGetMessage
-import com.knoldus.response.ResponseUtil
 import org.keycloak.OAuth2Constants
 import org.keycloak.admin.client.Keycloak
 import org.keycloak.representations.idm.CredentialRepresentation
@@ -31,8 +29,6 @@ class UserServices(keycloak: Keycloak)(implicit val system: ActorSystem, mat: Ma
       userRepresentation.setCredentials(credentials)
 
       val resp: Response = keycloak.realm(realm).users().create(userRepresentation)
-      val respMsgs = ResponseUtil.defaultMessages + (401 -> "Cannot create user. Unauthorised access")
-      checkResponseStatusGetMessage(resp, respMsgs)
       Future.successful(JsObject("status" -> JsString(resp.getStatusInfo.toString), "credentials" -> JsArray(
         credentials.asScala.map(r =>
           JsObject(

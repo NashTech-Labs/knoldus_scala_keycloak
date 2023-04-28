@@ -2,73 +2,14 @@ package com.knoldus.services.master.admin
 
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.server.Directives.onComplete
-import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import com.knoldus.models.entities.{Realm, Role}
-import com.knoldus.response.EmptyResponse
 import org.keycloak.admin.client.Keycloak
 import org.keycloak.representations.idm.RealmRepresentation
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
-/**
- *
- * @param keycloakMasterAdmin Should be configured to your keycloak admin within realm master
- * @param baseUrl
- * @param system
- * @param mat
- * @param logger
- */
-class MasterServices(keycloakMasterAdmin: Keycloak, baseUrl: String)(implicit override val system: ActorSystem, mat: Materializer, logger: LoggingAdapter)
-  extends KeycloakService(baseUrl) {
-
-  def addRealm(realmName: String): Route = {
-    onComplete(createRealmUtil(realmName)) {
-      case Success(resp) => logAndSendResponse(resp.getId, EmptyResponse(resp.getId), "Add Realm")
-      case Failure(e) => logAndSendError(s"log message ${e.getMessage}", e.getLocalizedMessage, "Add Realm")
-    }
-  }
-
-  def updateRealm(realmName: String, realm: Realm): Route = {
-    onComplete(updateRealmByName(realmName, realm)) {
-      case Success(resp) => logAndSendResponse(resp, EmptyResponse(resp), "Update Realm")
-      case Failure(e) => logAndSendError(s"log message ${e.getMessage}", e.getLocalizedMessage, "Update Realm")
-    }
-  }
-
-  def deleteRealm(realmName: String): Route = {
-    onComplete(deleteRealmByName(realmName)) {
-      case Success(resp) => logAndSendResponse(resp, EmptyResponse(resp), "Delete Realm")
-      case Failure(e) => logAndSendError(s"log message ${e.getMessage}", e.getLocalizedMessage, "Delete Realm")
-    }
-  }
-
-  def createRealmRole(realm: String, role: Role): Route = {
-    onComplete(createRealmRoleUtil(realm, role)) {
-      case Success(resp) => logAndSendResponse(s"Created realm role ${role.name}, id ${role.id}", EmptyResponse(resp), "Add Role To Realm")
-      case Failure(e) => logAndSendError(s"log message ${e.getMessage}", e.getLocalizedMessage, "Add Role To Realm")
-    }
-  }
-
-  def updateRealmRole(realm: String, roleName: String, role: Role): Route = {
-    onComplete(updateRealmRoleUtil(realm, roleName, role)) {
-      case Success(resp) => logAndSendResponse(s"Updated realm role ${role.name}", EmptyResponse(resp), "Update Realm Role")
-      case Failure(e) => logAndSendError(s"log message ${e.getMessage}", e.getLocalizedMessage, "Update Realm Role")
-    }
-  }
-
-  def deleteRealmRole(realm: String, roleName: String): Route = {
-    onComplete(deleteRealmRoleUtil(realm, roleName)) {
-      case Success(resp) => logAndSendResponse(s"Deleted realm role $roleName", EmptyResponse(resp), "Deleted Realm Role")
-      case Failure(e) => logAndSendError(s"log message ${e.getMessage}", e.getLocalizedMessage, "Deleted Realm Role")
-    }
-  }
-
-  // -------------------------------------------------
-  // ---------------- Helper Methods -----------------
-  // -------------------------------------------------
+class MasterServices(keycloakMasterAdmin: Keycloak)(implicit val system: ActorSystem, mat: Materializer, logger: LoggingAdapter) {
 
   def createRealmUtil(realmName: String): Future[RealmRepresentation] = {
     try {
