@@ -1,8 +1,6 @@
 package com.knoldus.services
 
-import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.stream.Materializer
 import com.knoldus.models.entities.Realm
 import org.keycloak.admin.client.Keycloak
 import org.keycloak.representations.idm.{AdminEventRepresentation, EventRepresentation}
@@ -10,16 +8,28 @@ import org.keycloak.representations.idm.{AdminEventRepresentation, EventRepresen
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.ListHasAsScala
 
-class RealmService(keycloak: Keycloak)(implicit val system: ActorSystem, mat: Materializer, logger: LoggingAdapter) {
+class RealmService(keycloak: Keycloak)(implicit val logger: LoggingAdapter) {
 
   def getRealms: Future[List[Realm]] = {
-    val realms = keycloak.realms().findAll().asScala.toList.map(Realm.convertToRealm)
-    Future.successful(realms)
+    try {
+      val realms = keycloak.realms().findAll().asScala.toList.map(Realm.convertToRealm)
+      Future.successful(realms)
+    } catch {
+      case e: Throwable =>
+        logger.error(s"Failed to fetch realms, with exception: ${e.getLocalizedMessage}")
+        Future.failed(e)
+    }
   }
 
   def getOneRealm(realmName: String): Future[Realm] = {
-    val realms = Realm.convertToRealm(keycloak.realms().realm(realmName).toRepresentation)
-    Future.successful(realms)
+    try {
+      val realms = Realm.convertToRealm(keycloak.realms().realm(realmName).toRepresentation)
+      Future.successful(realms)
+    } catch {
+      case e: Throwable =>
+        logger.error(s"Failed to fetch realm $realmName, with exception: ${e.getLocalizedMessage}")
+        Future.failed(e)
+    }
   }
 
   def getAdminEventsUtil(realm: String): Future[List[AdminEventRepresentation]] = {

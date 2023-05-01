@@ -4,7 +4,7 @@ ThisBuild / scalaVersion := "2.13.10"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "auth_autho_with_keycloak"
+    name := "knoldus_scala_keycloak"
   )
 
 val akkaHttpVersion = "10.5.0"

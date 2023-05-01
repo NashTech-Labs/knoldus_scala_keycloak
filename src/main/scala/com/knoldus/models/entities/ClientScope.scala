@@ -5,29 +5,6 @@ import org.keycloak.representations.idm.{ClientScopeRepresentation, ProtocolMapp
 import java.util
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsJava, MapHasAsScala, SeqHasAsJava}
 
-object ProtocolMapper {
-  def toRepresentation(proto: ProtocolMapper): ProtocolMapperRepresentation = {
-    val rep = new ProtocolMapperRepresentation()
-    rep.setId(proto.id.getOrElse(""))
-    rep.setName(proto.name)
-    rep.setProtocol(proto.protocol)
-    rep.setProtocolMapper(proto.protocolMapper)
-    rep.setConfig(proto.config.asJava)
-    rep
-  }
-
-  def toProtocolMapper(rep: ProtocolMapperRepresentation): ProtocolMapper = {
-    ProtocolMapper(
-      Option(rep.getId),
-      Option(rep.getName).getOrElse(""),
-      Option(rep.getProtocol).getOrElse(""),
-      Option(rep.getProtocolMapper).getOrElse(""),
-      Option(rep.isConsentRequired),
-      Option(rep.getConfig).getOrElse(new util.HashMap[String, String]()).asScala.toMap
-    )
-  }
-}
-
 object ClientScope {
   def toRepresentation(clientScope: ClientScope): ClientScopeRepresentation = {
     val scope = new ClientScopeRepresentation()
@@ -58,10 +35,3 @@ case class ClientScope(id: Option[String],
                        protocol: String,
                        attributes: Option[Map[String, String]],
                        protocolMapper: Option[List[ProtocolMapper]])
-
-case class ProtocolMapper(id: Option[String],
-                          name: String,
-                          protocol: String,
-                          protocolMapper: String,
-                          consentRequired: Option[Boolean],
-                          config: Map[String, String])

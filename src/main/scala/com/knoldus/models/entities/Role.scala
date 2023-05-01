@@ -1,6 +1,7 @@
 package com.knoldus.models.entities
 
 import org.keycloak.representations.idm.RoleRepresentation
+import spray.json.JsValue
 
 object Role {
   def roleToRoleRepresentation(role: Role): RoleRepresentation = {
@@ -21,16 +22,20 @@ object Role {
       Option(roleRep.getDescription),
       Option(roleRep.isComposite).getOrElse(false),
       Boolean.unbox(Option(roleRep.getClientRole).getOrElse(new java.lang.Boolean(false))),
-      Option(roleRep.getContainerId)
+      Option(roleRep.getContainerId),
+      Some(List.empty),
+      Some(Map.empty)
     )
   }
 }
 
-// TODO possibly add composites to roles
 case class Role(name: String,
                 id: Option[String],
                 description: Option[String],
                 composite: Boolean,
                 clientRole: Boolean,
-                containerId: Option[String])
+                containerId: Option[String],
+                compositeRealmRoles: Option[List[JsValue]],
+                compositeClientRoles: Option[Map[String, List[JsValue]]])
+
 

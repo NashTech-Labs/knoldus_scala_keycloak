@@ -1,8 +1,6 @@
 package com.knoldus.services
 
-import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.stream.Materializer
 import com.knoldus.models.entities.ClientScope
 import org.keycloak.admin.client.Keycloak
 import org.keycloak.representations.idm.ClientScopeRepresentation
@@ -10,7 +8,7 @@ import org.keycloak.representations.idm.ClientScopeRepresentation
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.ListHasAsScala
 
-class ClientScopeServices(keycloak: Keycloak)(implicit val system: ActorSystem, mat: Materializer, logger: LoggingAdapter) {
+class ClientScopeServices(keycloak: Keycloak)(implicit val logger: LoggingAdapter) {
 
   def createClientScopeUtil(realm: String, clientScope: ClientScope): Future[String] = {
     try {

@@ -1,8 +1,6 @@
 package com.knoldus.services
 
-import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.stream.Materializer
 import com.knoldus.models.entities.Role
 import org.keycloak.admin.client.Keycloak
 import org.keycloak.representations.idm.RoleRepresentation
@@ -10,7 +8,7 @@ import org.keycloak.representations.idm.RoleRepresentation
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.ListHasAsScala
 
-class RoleServices (keycloak: Keycloak)(implicit val system: ActorSystem, mat: Materializer, logger: LoggingAdapter) {
+class RoleServices(keycloak: Keycloak)(implicit val logger: LoggingAdapter) {
 
   def createClientRoleUtil(realm: String, clientId: String, role: Role): Future[String] = {
     try {

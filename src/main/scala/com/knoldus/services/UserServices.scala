@@ -1,8 +1,6 @@
 package com.knoldus.services
 
-import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.stream.Materializer
 import com.knoldus.models.Credentials
 import com.knoldus.models.entities.{Role, User}
 import org.keycloak.OAuth2Constants
@@ -15,7 +13,7 @@ import javax.ws.rs.core.Response
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters._
 
-class UserServices(keycloak: Keycloak)(implicit val system: ActorSystem, mat: Materializer, logger: LoggingAdapter) {
+class UserServices(keycloak: Keycloak)(implicit val logger: LoggingAdapter) {
 
   def createUser(user: User, realm: String): Future[JsObject] = {
     try {
@@ -46,11 +44,19 @@ class UserServices(keycloak: Keycloak)(implicit val system: ActorSystem, mat: Ma
     }
   }
 
-  def getAllUsers(realmName: String): Future[List[User]] = {
-    val realm = keycloak.realm(realmName)
-    val response = realm.users().list().asScala.toList.map(User.convertToUser)
-    Future.successful(response)
-  }
+  def getAllUsers(realm: String): Future[List[User]] =
+    try {
+      val realmResource = keycloak.realm(realm)
+      val userResource = realmResource.users()
+      val users = userResource.list().asScala.toList
+
+      val results = users.map(user => User.convertToUser(user))
+      Future.successful(results)
+    } catch {
+      case e: Throwable =>
+        logger.error(s"Failed to get users, with exception: ${e.getLocalizedMessage}")
+        Future.failed(e)
+    }
 
   def addGroupToUser(realmName: String, userId: String, groupId: String): Future[String] = {
     try {
@@ -68,16 +74,29 @@ class UserServices(keycloak: Keycloak)(implicit val system: ActorSystem, mat: Ma
     }
   }
 
-  def removeGroupFromUser(realmName: String, userId: String, groupId: String): Future[String] = {
-    val realm = keycloak.realm(realmName)
-    realm.users().get(userId).leaveGroup(groupId)
-    Future.successful(userId)
-  }
+  def removeGroupFromUser(realmName: String, userId: String, groupId: String): Future[String] =
+    try {
+      val realm = keycloak.realm(realmName)
+      realm.users().get(userId).leaveGroup(groupId)
+      Future.successful(userId)
+    } catch {
+      case e: Throwable =>
+        logger.error(s"Failed to remove user $userId from group $groupId, with exception: ${e.getLocalizedMessage}")
+        Future.failed(e)
+    }
 
-  def getOneUser(realmName: String, userId: String): Future[User] = {
-    val realm = keycloak.realm(realmName)
-    val response = User.convertToUser(realm.users().get(userId).toRepresentation)
-    Future.successful(response)
+
+  def getOneUser(realm: String, userId: String): Future[User] = {
+    try {
+      val userResource = keycloak.realm(realm).users().get(userId)
+      val clientHashedIds = keycloak.realm(realm).clients().findAll().asScala.toList.map(client => (client.getId, client.getClientId))
+
+      Future.successful(User.convertToUser(userResource.toRepresentation))
+    } catch {
+      case e: Throwable =>
+        logger.error(s"Failed to get user $userId, with exception: ${e.getLocalizedMessage}")
+        Future.failed(e)
+    }
   }
 
   def addRoleToUser(realm: String, userId: String, role: Role, clientIdO: Option[String]): Future[String] = {
@@ -110,14 +129,24 @@ class UserServices(keycloak: Keycloak)(implicit val system: ActorSystem, mat: Ma
     }
   }
 
-  def updateUser(realmName: String, userId: String, user: User): Future[String] = {
-    val groupRepresentation = User.convertToUserRep(user)
-    keycloak.realm(realmName).users().get(userId).update(groupRepresentation)
-    Future.successful(userId)
-  }
+  def updateUser(realmName: String, userId: String, user: User): Future[String] =
+    try {
+      val groupRepresentation = User.convertToUserRep(user)
+      keycloak.realm(realmName).users().get(userId).update(groupRepresentation)
+      Future.successful(userId)
+    } catch {
+      case e: Throwable =>
+        logger.error(s"Failed to update user $userId, with exception: ${e.getLocalizedMessage}")
+        Future.failed(e)
+    }
 
-  def deleteUser(realmName: String, userId: String): Future[String] = {
-    keycloak.realm(realmName).users().get(userId).remove()
-    Future.successful(userId)
-  }
+  def deleteUser(realmName: String, userId: String): Future[String] =
+    try {
+      keycloak.realm(realmName).users().get(userId).remove()
+      Future.successful(userId)
+    } catch {
+      case e: Throwable =>
+        logger.error(s"Failed to delete user $userId, with exception: ${e.getLocalizedMessage}")
+        Future.failed(e)
+    }
 }

@@ -1,15 +1,13 @@
 package com.knoldus.services.master.admin
 
-import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.stream.Materializer
 import com.knoldus.models.entities.{Realm, Role}
 import org.keycloak.admin.client.Keycloak
 import org.keycloak.representations.idm.RealmRepresentation
 
 import scala.concurrent.Future
 
-class MasterServices(keycloakMasterAdmin: Keycloak)(implicit val system: ActorSystem, mat: Materializer, logger: LoggingAdapter) {
+class MasterServices(keycloakMasterAdmin: Keycloak)(implicit val logger: LoggingAdapter) {
 
   def createRealmUtil(realmName: String): Future[RealmRepresentation] = {
     try {

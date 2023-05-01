@@ -1,9 +1,7 @@
 package com.knoldus.services
 
-import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.server.Route
-import akka.stream.Materializer
 import com.knoldus.models.entities.Client
 import org.keycloak.admin.client.Keycloak
 import org.keycloak.representations.idm.ClientRepresentation
@@ -12,16 +10,7 @@ import javax.ws.rs.core.Response
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.ListHasAsScala
 
-class ClientServices(keycloak: Keycloak)(implicit val system: ActorSystem, mat: Materializer, logger: LoggingAdapter) {
-
-
-  def addPolicy: Route = ???
-
-  def getPolicy: Route = ???
-
-  def updatePolicy: Route = ???
-
-  def deletePolicy: Route = ???
+class ClientServices(keycloak: Keycloak)(implicit val logger: LoggingAdapter) {
 
   def createClient(client: Client, realm: String): Future[String] = {
     try {
